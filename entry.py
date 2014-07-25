@@ -4,6 +4,20 @@
 class EntryManager(object):
     entries = []
 
+    def __init__(self, data_dict=None):
+        """
+        Initialize the entry manager.
+        If supplied with a data dict, attempt to create Entry instances
+        """
+        if data_dict:
+
+            fields = list(Entry().__dict__.keys())
+            for item in data_dict:
+                entry = Entry()
+                for field in fields:
+                    setattr(entry, field, item.get(field))
+                self.add_entry(entry)
+
     def add_entry(self, entry):
         self.entries.append(entry)
         print("added entry", entry.name)
@@ -27,14 +41,26 @@ class Entry(object):
 
     BASE_URL = "http://veganistan.se"
 
-    def __init__(self, name, absolute_url, category, town,
-                 rating, nof_votes):
+    def __init__(self, name=None, absolute_url=None, category=None,
+                 town=None, rating=None, nof_votes=None):
         self.name = name
         self.absolute_url = absolute_url
         self.category = category
         self.town = town
         self.rating = rating
         self.nof_votes = nof_votes
+
+        # added through the detail scraper
+        self.url = None
+        self.phone = None
+        self.price_range = None
+        self.food_type = None
+        self.food_range = None
+        self.service = None
+        self.vegan_on_menu = None
+        self.union_agreement = None
+        self.warnings = None
+        self.accessibility = None
 
     def get_absolute_url(self):
         return u'%s%s' % (self.BASE_URL, self.absolute_url)
@@ -47,4 +73,14 @@ class Entry(object):
 
     def __repr__(self):
         return self.__str__()
+
+
+class Address(object):
+
+    def __init__(self, entry=None, street_address=None,
+                 postal_code=None, town=None):
+        self.entry = entry
+        self.street_address = street_address
+        self.postal_code = postal_code
+        self.town = town
 

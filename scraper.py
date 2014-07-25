@@ -1,19 +1,21 @@
 # coding: utf-8
-
-import json
-import requests
 from datetime import datetime
+
+import requests
 from bs4 import BeautifulSoup
 from entry import EntryManager, Entry
+from scrape_details import get_description, get_url, get_phone, get_price_range, get_food_type, get_food_range, get_service, get_vegan_on_menu, get_union_agreement, get_warnings, get_accessibility
+from utils import serialize_items, save_json_file, load_json_file
 
 PAGINATE_SUFFIX = "?page="
 
-list_pages = (
+LIST_PAGES = (
     "http://veganistan.se/stockholm/",
     "http://veganistan.se/goteborg/",
     "http://veganistan.se/malmo/",
     "http://veganistan.se/spenaten/",
 )
+
 
 def add_to_list(original_list, entry):
     if entry not in original_list:
@@ -98,7 +100,7 @@ def create_entry(row):
 
 def scrape_base_info():
     """
-    Run the scraping and add results to an EntryManager.
+    Scrape the base info of all resturants based on veganistan.se's list pages
     This is returned when all is finished.
     """
     categories = []
@@ -106,7 +108,7 @@ def scrape_base_info():
 
     entry_manager = EntryManager()
 
-    for url in list_pages:
+    for url in LIST_PAGES:
         print("URL: ", url)
         list_page = requests.get(url)
         soup = BeautifulSoup(list_page.content)
@@ -117,7 +119,7 @@ def scrape_base_info():
         for page_id in range(0, nof_pages):
             if not on_first_page:
                 # fetch the new page
-                url = u'%s%s%s' % (list_pages[0], PAGINATE_SUFFIX, (page_id+1))
+                url = u'%s%s%s' % (LIST_PAGES[0], PAGINATE_SUFFIX, (page_id+1))
                 list_page = requests.get(url)
                 print("fetching a new page %s " % page_id)
                 soup = BeautifulSoup(list_page.content)
@@ -140,29 +142,66 @@ def scrape_base_info():
     return entry_manager
 
 
-def serialize_items(items):
+def scrape_detail(entry):
     """
-    Returns a list of dicts with all the entries
+    Scrape the detail page for an entry
     """
-    final_list = []
-    for item in items:
-        final_list.append(item.__dict__)
-    return final_list
+
+    url = "http://veganistan.se"+entry.absolute_url
+    print("fetching url", url)
+    page = requests.get(url)
+    soup = BeautifulSoup(page.content)
+
+    entry.description = get_description(soup)
+    entry.url = get_url(soup)
+    entry.phone = get_phone(soup)
+    entry.price_range = get_price_range(soup)
+    entry.food_type = get_food_type(soup)
+    entry.food_range = get_food_range(soup)
+    entry.service = get_service(soup)
+    entry.vegan_on_menu = get_vegan_on_menu(soup)
+    entry.union_agreement = get_union_agreement(soup)
+    entry.warnings = get_warnings(soup)
+    entry.accessibility = get_accessibility(soup)
+
+    print("entry %s updated" % entry)
+    return entry
 
 
-def save_file(data, directory, filename):
-    fn = directory+"/"+filename
-    with open(fn, "w") as f:
-        json.dump(data, f, ensure_ascii=False)
+def serialize_and_save(entries, filename):
+    json_data = serialize_items(entries)
+
+    return save_json_file(
+        data=json_data,
+        filename=filename)
 
 
 if __name__ == "__main__":
 
-    entry_manager = scrape_base_info()
-    json_data = serialize_items(entry_manager.get_entries())
-    save_file(
-        json_data,
-        "json",
-        '%s.json' % datetime.now().strftime("%Y%m%d_%H%M"))
+    # TODO: Accept sys args
+    load = False
 
-    import ipdb; ipdb.set_trace()
+    created_file = None
+    if load:
+        data = load_json_file("json", "20140725_0940.json")
+        entry_manager = EntryManager(data_dict=data)
+    else:
+        # start scraping the base data for all entries.
+        entry_manager = scrape_base_info()
+
+        created_file = serialize_and_save(
+            entries=entry_manager.get_entries(),
+            filename='json/%s.json' % datetime.now().strftime("%Y%m%d_%H%M")
+        )
+
+    # json_data = serialize_items(entry_manager.get_entries())
+    # save_json_file(
+    #     json_data,
+    #     "json",
+    #     '%s.json' % datetime.now().strftime("%Y%m%d_%H%M"))
+
+    for entry in entry_manager.get_entries():
+        scrape_detail(entry)
+
+    if created_file:
+        serialize_and_save(entry_manager.get_entries(), created_file)
