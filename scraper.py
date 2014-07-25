@@ -1,6 +1,8 @@
 # coding: utf-8
 
+import json
 import requests
+from datetime import datetime
 from bs4 import BeautifulSoup
 from entry import EntryManager, Entry
 
@@ -94,7 +96,7 @@ def create_entry(row):
     return entry
 
 
-def start_scraping():
+def scrape_base_info():
     """
     Run the scraping and add results to an EntryManager.
     This is returned when all is finished.
@@ -137,6 +139,30 @@ def start_scraping():
             on_first_page = False
     return entry_manager
 
+
+def serialize_items(items):
+    """
+    Returns a list of dicts with all the entries
+    """
+    final_list = []
+    for item in items:
+        final_list.append(item.__dict__)
+    return final_list
+
+
+def save_file(data, directory, filename):
+    fn = directory+"/"+filename
+    with open(fn, "w") as f:
+        json.dump(data, f, ensure_ascii=False)
+
+
 if __name__ == "__main__":
 
-    entry_manager = start_scraping()
+    entry_manager = scrape_base_info()
+    json_data = serialize_items(entry_manager.get_entries())
+    save_file(
+        json_data,
+        "json",
+        '%s.json' % datetime.now().strftime("%Y%m%d_%H%M"))
+
+    import ipdb; ipdb.set_trace()
