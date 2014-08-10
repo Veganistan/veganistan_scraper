@@ -43,7 +43,9 @@ def handle_nested_type(json_data, key):
             _list.append(field)
 
     food_types = [i.split(',') for i in _list]
-    food_list = [item.replace(" ", "") for sublist in food_types for item in sublist]
+    # TODO: replace only spaces in first or last position
+    food_list = [item.lstrip().rstrip() for sublist in food_types for item in
+                 sublist]
     food_type_set = sorted(set(food_list))
 
     for idx, item in enumerate(food_type_set):
@@ -52,11 +54,21 @@ def handle_nested_type(json_data, key):
 
 
 def save_to_file(obj, obj_name):
-
     filename = "json/formatted/%s.json" % obj_name
     with open(filename, "w") as f:
         json.dump(obj, f, ensure_ascii=False)
-    return None
+    return filename
+
+
+def match_values(obj, values):
+    if values:
+        return [(k, v) for k, v in obj.items() if v in values]
+    return []
+
+
+def set_value(obj):
+    return [{"id": id, "value": value} for id, value in obj]
+
 
 if __name__ == "__main__":
 
@@ -67,18 +79,38 @@ if __name__ == "__main__":
         json_data = json.load(f)
 
         # start with populating the relations
+        # NOTE: food type is currently a bit off
+        FOOD_TYPE = handle_nested_type(json_data, "food_type")
         PRICE_RANGE = handle_nested_type(json_data, "price_range")
         FOOD_RANGE = handle_nested_type(json_data, "food_range")
         CATEGORY = handle_nested_type(json_data, "category")
         SERVICE = handle_nested_type(json_data, "service")
-        # food type is currently a bit off
-        FOOD_TYPE = handle_nested_type(json_data, "food_type")
 
+        save_to_file(FOOD_TYPE, "food_type")
         save_to_file(PRICE_RANGE, "price_range")
         save_to_file(FOOD_RANGE, "food_range")
-        save_to_file(FOOD_TYPE, "food_type")
         save_to_file(CATEGORY, "category")
         save_to_file(SERVICE, "service")
 
+
+        # setting the relations between a resturant and its attributes
+        # item is on individual resturant, store, etc
         for item in json_data:
-            import ipdb; ipdb.set_trace()
+            food_type = match_values(FOOD_TYPE, item["food_type"])
+            price_range = match_values(PRICE_RANGE, item["price_range"])
+            category = match_values(CATEGORY, item["category"])
+            food_range = match_values(FOOD_RANGE, item["food_range"])
+            service = match_values(SERVICE, item["service"])
+
+            # start overriding the existing data with the new
+
+            item["service"] = set_value(service)
+            item["food_type"] = set_value(food_type)
+            item["food_range"] = set_value(food_range)
+            item["price_range"] = set_value(price_range)
+            item["category"] = set_value(category)
+
+
+        # finally save the resturants/stores and other entries into a json file
+        filename = save_to_file(json_data, "entries")
+        print("Finished. Saved %s successfully" % filename)
