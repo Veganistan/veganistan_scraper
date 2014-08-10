@@ -13,7 +13,7 @@ def serialize_items(items):
 
 
 def save_json_file(data, filename):
-    filename
+    # filename
     with open(filename, "w") as f:
         json.dump(data, f, ensure_ascii=False)
     return filename

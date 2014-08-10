@@ -2,31 +2,10 @@
 # formats a created JSON file into separate files and better structure
 
 import json
+import time
 
 OUTPUT_DIR = "json/formatted"
-
-
-def price_ranges(data):
-    data = data
-
-
-# ONE TO ONE
-PRICE_RANGE = {}
-FOOD_RANGE = {}
-CATEGORY = {}
-VEGAN_ON_MENU = {
-    0: False,
-    1: True,
-    2: "N/A"
-}
-UNION_AGREMENT = {
-    0: False,
-    1: True,
-    2: "N/A"
-}
-
-# MANY TO MANY
-SERVICE = {}
+DEBUG = True
 
 
 def handle_nested_type(json_data, key):
@@ -57,6 +36,8 @@ def save_to_file(obj, obj_name):
     filename = "json/formatted/%s.json" % obj_name
     with open(filename, "w") as f:
         json.dump(obj, f, ensure_ascii=False)
+        if DEBUG:
+            print("Saved %s" % filename)
     return filename
 
 
@@ -72,45 +53,38 @@ def set_value(obj):
 
 if __name__ == "__main__":
 
+    time_started = time.time()
     # TODO: Open the latest file in the dir
     latest_file = "json/20140810_1103.json"
 
+    # we're interested in these fields for populating the json file
+    # all these fields with corresponding data will also get saved to separate
+    # json files such as ``field.json``.
+    fields = ["food_type", "price_range", "food_range", "category", "service",
+              "accessibility", "union_agreement", "vegan_on_menu"]
+
     with open(latest_file, "r") as f:
+
         json_data = json.load(f)
 
-        # start with populating the relations
-        # NOTE: food type is currently a bit off
-        FOOD_TYPE = handle_nested_type(json_data, "food_type")
-        PRICE_RANGE = handle_nested_type(json_data, "price_range")
-        FOOD_RANGE = handle_nested_type(json_data, "food_range")
-        CATEGORY = handle_nested_type(json_data, "category")
-        SERVICE = handle_nested_type(json_data, "service")
+        entries = {}
 
-        save_to_file(FOOD_TYPE, "food_type")
-        save_to_file(PRICE_RANGE, "price_range")
-        save_to_file(FOOD_RANGE, "food_range")
-        save_to_file(CATEGORY, "category")
-        save_to_file(SERVICE, "service")
+        for field in fields:
+            result = handle_nested_type(json_data, field)
+            save_to_file(result, field)
+            # save all results in a dict for future use
+            entries.update({field: result})
 
-
-        # setting the relations between a resturant and its attributes
-        # item is on individual resturant, store, etc
+        # loop over each entry - each resturant, store, etc
         for item in json_data:
-            food_type = match_values(FOOD_TYPE, item["food_type"])
-            price_range = match_values(PRICE_RANGE, item["price_range"])
-            category = match_values(CATEGORY, item["category"])
-            food_range = match_values(FOOD_RANGE, item["food_range"])
-            service = match_values(SERVICE, item["service"])
 
-            # start overriding the existing data with the new
-
-            item["service"] = set_value(service)
-            item["food_type"] = set_value(food_type)
-            item["food_range"] = set_value(food_range)
-            item["price_range"] = set_value(price_range)
-            item["category"] = set_value(category)
-
+            results = {}
+            for field in fields:
+                result_for_field = match_values(entries.get(field), item[field])
+                # reset the value
+                item[field] = set_value(result_for_field)
 
         # finally save the resturants/stores and other entries into a json file
-        filename = save_to_file(json_data, "entries")
-        print("Finished. Saved %s successfully" % filename)
+        save_to_file(json_data, "entries")
+        ended_in = time.time() - time_started
+        print("Finished. Formatted and saved all entries in: %s seconds" % ended_in)
