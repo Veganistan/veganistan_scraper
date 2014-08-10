@@ -1,1 +1,1 @@
-[{"id": 0, "value": "Ja"}, {"id": 1, "value": "Nej"}, {"id": 2, "value": "Vet ej"}]
+[{"value": "Ja", "id": 0}, {"value": "Nej", "id": 1}, {"value": "Vet ej", "id": 2}]

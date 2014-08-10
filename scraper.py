@@ -4,16 +4,16 @@ from datetime import datetime
 import requests
 from bs4 import BeautifulSoup
 from entry import EntryManager, Entry
-from scrape_details import get_description, get_url, get_phone, get_price_range, get_food_type, get_food_range, get_service, get_vegan_on_menu, get_union_agreement, get_warnings, get_accessibility
+from scrape_details import get_class_text, get_rel_class
 from utils import serialize_items, save_json_file, load_json_file
 
 PAGINATE_SUFFIX = "?page="
 
 LIST_PAGES = (
     "http://veganistan.se/stockholm/",
-    "http://veganistan.se/goteborg/",
-    "http://veganistan.se/malmo/",
-    "http://veganistan.se/spenaten/",
+    #"http://veganistan.se/goteborg/",
+    #"http://veganistan.se/malmo/",
+    #"http://veganistan.se/spenaten/",
 )
 
 
@@ -62,6 +62,7 @@ def get_category(row):
 
 def get_town(row):
     """ Ort """
+    import ipdb; ipdb.set_trace()
     town = row.find_all(class_="views-field-field-adress")[0].text
     return clean_string(town)
 
@@ -93,10 +94,10 @@ def create_entry(row):
         name=get_name(row),
         absolute_url=get_absolute_url(row),
         category=get_category(row),
-        town=get_town(row),
         rating=get_rating(row),
-        nof_votes = get_nof_votes(row)
+        nof_votes=get_nof_votes(row)
     )
+
     return entry
 
 
@@ -154,17 +155,22 @@ def scrape_detail(entry):
     page = requests.get(url)
     soup = BeautifulSoup(page.content)
 
-    entry.description = get_description(soup)
-    entry.url = get_url(soup)
-    entry.phone = get_phone(soup)
-    entry.price_range = get_price_range(soup)
-    entry.food_type = get_food_type(soup)
-    entry.food_range = get_food_range(soup)
-    entry.service = get_service(soup)
-    entry.vegan_on_menu = get_vegan_on_menu(soup)
-    entry.union_agreement = get_union_agreement(soup)
-    entry.warnings = get_warnings(soup)
-    entry.accessibility = get_accessibility(soup)
+    entry.description = get_rel_class(soup, "field-type-text-with-summary")
+    entry.url = get_rel_class(soup, "field-name-field-hemsida")
+    entry.phone = get_rel_class(soup, "field-name-field-telefonnummer")
+    entry.price_range = get_rel_class(soup, "field-name-field-prisintervall")
+    entry.food_type = get_rel_class(soup, "field-name-field-typ-av-mat")
+    entry.food_range = get_rel_class(soup, "field-name-field-utbud")
+    entry.service = get_rel_class(soup, "field-name-field-utbud-och-service")
+    entry.vegan_on_menu = get_rel_class(soup, "field-name-field-veganskt-pa-menyn")
+    entry.union_agreement = get_rel_class(soup, "field-name-field-kollektivavtal")
+    entry.warnings = get_rel_class(soup, "field-name-field-varningar")
+    entry.accessibility = get_rel_class(soup, "field-name-field-tillganglighetsanpassad")
+
+    # individual fields
+    entry.street_address = get_class_text(soup, "street-block")
+    entry.postal_code = get_class_text(soup, "postal-code")
+    entry.town = get_class_text(soup, "locality")
 
     print("entry %s updated" % entry)
     return entry
@@ -196,11 +202,6 @@ if __name__ == "__main__":
             filename='json/%s.json' % datetime.now().strftime("%Y%m%d_%H%M")
         )
 
-    # json_data = serialize_items(entry_manager.get_entries())
-    # save_json_file(
-    #     json_data,
-    #     "json",
-    #     '%s.json' % datetime.now().strftime("%Y%m%d_%H%M"))
 
     for entry in entry_manager.get_entries():
         scrape_detail(entry)

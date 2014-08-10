@@ -16,6 +16,7 @@ def save_json_file(data, filename):
     # filename
     with open(filename, "w") as f:
         json.dump(data, f, ensure_ascii=False)
+    print("Saved %s successfully" % filename)
     return filename
 
 

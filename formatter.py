@@ -64,7 +64,7 @@ if __name__ == "__main__":
 
     time_started = time.time()
     # TODO: Open the latest file in the dir
-    latest_file = "json/20140810_1103.json"
+    latest_file = "json/20140810_2257.json"
 
     # we're interested in these fields for populating the json file
     # all these fields with corresponding data will also get saved to separate

@@ -1,1 +1,1 @@
-[{"id": 0, "value": "Butik"}, {"id": 1, "value": "Kafé"}, {"id": 2, "value": "Pub/krog/bar/klubb"}, {"id": 3, "value": "Restaurang"}]
+[{"value": "Butik", "id": 0}, {"value": "Kafé", "id": 1}, {"value": "Pub/krog/bar/klubb", "id": 2}, {"value": "Restaurang", "id": 3}]

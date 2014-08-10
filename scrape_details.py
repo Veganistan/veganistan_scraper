@@ -2,7 +2,9 @@
 
 
 def field_items_text(content):
-
+    """
+    Creates a comma separated string of values for a particular field
+    """
     if len(content):
         tag = content[0].find_all(class_="field-items")[0]
         if len(tag.contents):
@@ -12,82 +14,17 @@ def field_items_text(content):
     return None
 
 
-def get_description(soup):
-    content = soup.find_all(class_="field-type-text-with-summary")
-    if len(content):
-        return content[0].text
-    return None
-
-
-def get_url(soup):
-    content = soup.find_all(class_="field-name-field-hemsida")
-    if len(content):
-        return content[0].find_all("a")[0].attrs.get("href")
-    return None
-
-
-def get_phone(soup):
-    content = soup.find_all(class_="field-name-field-telefonnummer")
-    return field_items_text(content)
-
-
-def get_price_range(soup):
-    content = soup.find_all(class_="field-name-field-prisintervall")
-    return field_items_text(content)
-
-
-def get_food_type(soup):
+def get_rel_class(soup, class_name):
     """
-    Typ av mat
+    Extracts text from a given html class and comma separates the values.
     """
-    content = soup.find_all(class_="field-name-field-typ-av-mat")
-    return field_items_text(content)
+    return field_items_text(soup.find_all(class_=class_name))
 
 
-def get_food_range(soup):
+def get_class_text(soup, class_name):
     """
-    Utbud field-name-field-utbud
+    Extracts text from a given html class
     """
-    content = soup.find_all(class_="field-name-field-utbud")
-    return field_items_text(content)
-
-
-def get_service(soup):
-    """
-    Service
-    """
-    content = soup.find_all(class_="field-name-field-utbud-och-service")
-    return field_items_text(content)
-
-
-def get_vegan_on_menu(soup):
-    """
-    Service
-    """
-    content = soup.find_all(class_="field-name-field-veganskt-pa-menyn")
-    return field_items_text(content)
-
-
-def get_union_agreement(soup):
-    """
-    Kollektivavtal
-    """
-    content = soup.find_all(class_="field-name-field-kollektivavtal")
-    return field_items_text(content)
-
-
-def get_warnings(soup):
-    """
-    Varningar
-    """
-    content = soup.find_all(class_="field-name-field-varningar")
-    return field_items_text(content)
-
-
-def get_accessibility(soup):
-    """
-    Tillgänglighetsanpassad
-    """
-    content = soup.find_all(class_="field-name-field-tillganglighetsanpassad")
-    return field_items_text(content)
-
+    data = soup.find_all(class_=class_name)
+    if len(data):
+        return data[0].text

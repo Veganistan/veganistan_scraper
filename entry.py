@@ -65,6 +65,7 @@ class Entry(object):
     def get_absolute_url(self):
         return u'%s%s' % (self.BASE_URL, self.absolute_url)
 
+
     def __unicode__(self):
         return u'%s %s' % (self.name, self.town)
 

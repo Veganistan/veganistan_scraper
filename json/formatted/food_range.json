@@ -1,1 +1,1 @@
-[{"id": 0, "value": "Blandkost"}, {"id": 1, "value": "Veganskt"}, {"id": 2, "value": "Vegetariskt"}]
+[{"value": "Blandkost", "id": 0}, {"value": "Veganskt", "id": 1}, {"value": "Vegetariskt", "id": 2}]
