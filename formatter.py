@@ -34,6 +34,15 @@ def handle_nested_type(json_data, key):
 
 def save_to_file(obj, obj_name):
     filename = "json/formatted/%s.json" % obj_name
+
+    # in the case for all individual items such as food_range, service and so on
+    # we want to convert these into a dict
+    try:
+        obj = [{"id": id, "value": value} for id, value in obj.items()]
+    except:
+        # this is where we'll saving the json_data object
+        pass
+
     with open(filename, "w") as f:
         json.dump(obj, f, ensure_ascii=False)
         if DEBUG:
