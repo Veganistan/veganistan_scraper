@@ -49,8 +49,16 @@ Output from the formatter is found in ``json/formatted``
 
 ## Files and resources
 
+### accessibility.json
+Adapted for accessibility
+
+
 ### category.json
 Boutique, pub, etc
+
+
+### entries.json
+Contains the bulk of data. All resturants etc.
 
 
 ### food_range.json
@@ -69,5 +77,11 @@ Cheap, expensive, etc
 Home delivery, catering, etc
 
 
-### entries.json
-Each individual resturant, store, café
+### union_agreement.json
+Has agreement with the union
+
+
+### vegan_on_menu.json
+Vegan options
+
+
