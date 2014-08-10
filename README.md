@@ -10,8 +10,15 @@ base data from the site to be imported into an API service.
 
 ## Development
 
-Python 3.4
-Beautifulsoup4
+Requirements::
+
+    Python 3.4
+    Virtualenv
+    Pip for python3
+    Beautifulsoup4
+
+
+Create a virtualenvironment and install the dependencies using ``pip3``::
 
     mkvirtualenv --python=/usr/local/bin/python3 veganistan_scraper
     pip3 install requirements/default.pip
