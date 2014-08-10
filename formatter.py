@@ -29,7 +29,12 @@ UNION_AGREMENT = {
 SERVICE = {}
 
 
-def handle_food_type(json_data, key):
+def handle_nested_type(json_data, key):
+    """
+    Extract data from big JSON data, append all items to a list,
+    turn that list into a set to avoid duplicates and sort the set alphabetically.
+    Special case for food types since they are nested together
+    """
     _list = []
     _dict = {}
     for item in json_data:
@@ -46,21 +51,12 @@ def handle_food_type(json_data, key):
     return _dict
 
 
-def set_dict_by_key(json_data, key):
-    """ Mutates a given dict with values from a given key
-    """
-    _list = []
-    _dict = {}
-    for item in json_data:
-        field = item.get(key)
-        if field:
-            _list.append(field)
+def save_to_file(obj, obj_name):
 
-    for idx, item in enumerate(set(_list)):
-        _dict.update({idx: item})
-
-    return _dict
-
+    filename = "json/formatted/%s.json" % obj_name
+    with open(filename, "w") as f:
+        json.dump(obj, f, ensure_ascii=False)
+    return None
 
 if __name__ == "__main__":
 
@@ -71,13 +67,18 @@ if __name__ == "__main__":
         json_data = json.load(f)
 
         # start with populating the relations
-        PRICE_RANGE = set_dict_by_key(json_data, "price_range")
-        FOOD_RANGE = set_dict_by_key(json_data, "food_range")
-        CATEGORY = set_dict_by_key(json_data, "category")
-        SERVICE = set_dict_by_key(json_data, "service")
-
+        PRICE_RANGE = handle_nested_type(json_data, "price_range")
+        FOOD_RANGE = handle_nested_type(json_data, "food_range")
+        CATEGORY = handle_nested_type(json_data, "category")
+        SERVICE = handle_nested_type(json_data, "service")
         # food type is currently a bit off
-        FOOD_TYPE = handle_food_type(json_data, "food_type")
+        FOOD_TYPE = handle_nested_type(json_data, "food_type")
+
+        save_to_file(PRICE_RANGE, "price_range")
+        save_to_file(FOOD_RANGE, "food_range")
+        save_to_file(FOOD_TYPE, "food_type")
+        save_to_file(CATEGORY, "category")
+        save_to_file(SERVICE, "service")
 
         for item in json_data:
             import ipdb; ipdb.set_trace()
