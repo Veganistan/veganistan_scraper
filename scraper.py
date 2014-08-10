@@ -55,11 +55,13 @@ def get_absolute_url(row):
 
 
 def get_category(row):
+    """ Typ av ställe """
     category = row.find_all(class_="views-field-field-typ-av-stalle")[0].text
     return clean_string(category)
 
 
 def get_town(row):
+    """ Ort """
     town = row.find_all(class_="views-field-field-adress")[0].text
     return clean_string(town)
 

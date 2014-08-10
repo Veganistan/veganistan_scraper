@@ -4,7 +4,11 @@
 def field_items_text(content):
 
     if len(content):
-        return content[0].find_all(class_="field-items")[0].text
+        tag = content[0].find_all(class_="field-items")[0]
+        if len(tag.contents):
+            return ', '.join([c.text for c in tag.contents])
+        else:
+            return tag.text
     return None
 
 
