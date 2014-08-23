@@ -60,3 +60,4 @@ docs/_build/
 
 # Package specifics
 json/*.json
+settings_local.py

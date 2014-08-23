@@ -185,8 +185,12 @@ def scrape_detail(entry):
     return entry
 
 
-def serialize_and_save(entries, filename):
-    json_data = serialize_items(entries)
+def serialize_and_save(entries, filename, use_serializer=True):
+    if use_serializer:
+        json_data = serialize_items(entries)
+    else:
+        # just dump it to json without any fancy stuff
+        json_data = entries
 
     return save_json_file(
         data=json_data,
