@@ -3,7 +3,6 @@
 
 class EntryManager(object):
     entries = []
-
     def __init__(self, data_dict=None):
         """
         Initialize the entry manager.
@@ -19,8 +18,11 @@ class EntryManager(object):
                 self.add_entry(entry)
 
     def add_entry(self, entry):
+        # start with adding the id for this entry
+        id = len(self.entries)
+        entry.set_id(id)
         self.entries.append(entry)
-        print("added entry", entry.name)
+        print("added entry %s : %s " % (id, entry.name))
 
     def get_entries(self):
         return self.entries
@@ -65,6 +67,8 @@ class Entry(object):
     def get_absolute_url(self):
         return u'%s%s' % (self.BASE_URL, self.absolute_url)
 
+    def set_id(self, id):
+        self.id = id
 
     def __unicode__(self):
         return u'%s %s' % (self.name, self.town)

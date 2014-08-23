@@ -11,9 +11,9 @@ PAGINATE_SUFFIX = "?page="
 
 LIST_PAGES = (
     "http://veganistan.se/stockholm/",
-    #"http://veganistan.se/goteborg/",
-    #"http://veganistan.se/malmo/",
-    #"http://veganistan.se/spenaten/",
+    "http://veganistan.se/goteborg/",
+    "http://veganistan.se/malmo/",
+    "http://veganistan.se/spenaten/",
 )
 
 
@@ -62,7 +62,9 @@ def get_category(row):
 
 def get_town(row):
     """ Ort """
-    import ipdb; ipdb.set_trace()
+    import ipdb;
+
+    ipdb.set_trace()
     town = row.find_all(class_="views-field-field-adress")[0].text
     return clean_string(town)
 
@@ -122,7 +124,8 @@ def scrape_base_info():
         for page_id in range(0, nof_pages):
             if not on_first_page:
                 # fetch the new page
-                url = u'%s%s%s' % (LIST_PAGES[0], PAGINATE_SUFFIX, (page_id+1))
+                url = u'%s%s%s' % (
+                    LIST_PAGES[0], PAGINATE_SUFFIX, (page_id + 1))
                 list_page = requests.get(url)
                 print("fetching a new page %s " % page_id)
                 soup = BeautifulSoup(list_page.content)
@@ -150,7 +153,7 @@ def scrape_detail(entry):
     Scrape the detail page for an entry
     """
 
-    url = "http://veganistan.se"+entry.absolute_url
+    url = "http://veganistan.se" + entry.absolute_url
     print("fetching url", url)
     page = requests.get(url)
     soup = BeautifulSoup(page.content)
@@ -162,10 +165,16 @@ def scrape_detail(entry):
     entry.food_type = get_rel_class(soup, "field-name-field-typ-av-mat")
     entry.food_range = get_rel_class(soup, "field-name-field-utbud")
     entry.service = get_rel_class(soup, "field-name-field-utbud-och-service")
-    entry.vegan_on_menu = get_rel_class(soup, "field-name-field-veganskt-pa-menyn")
-    entry.union_agreement = get_rel_class(soup, "field-name-field-kollektivavtal")
+    entry.vegan_on_menu = get_rel_class(
+        soup,
+        "field-name-field-veganskt-pa-menyn")
+    entry.union_agreement = get_rel_class(
+        soup,
+        "field-name-field-kollektivavtal")
     entry.warnings = get_rel_class(soup, "field-name-field-varningar")
-    entry.accessibility = get_rel_class(soup, "field-name-field-tillganglighetsanpassad")
+    entry.accessibility = get_rel_class(
+        soup,
+        "field-name-field-tillganglighetsanpassad")
 
     # individual fields
     entry.street_address = get_class_text(soup, "street-block")
@@ -184,11 +193,13 @@ def serialize_and_save(entries, filename):
         filename=filename)
 
 
-if __name__ == "__main__":
-
-    # TODO: Accept sys args
-    load = False
-
+def run(load=False):
+    """
+    Entry point. This function could be called by external services.
+    Connects to veganistan.se and fetches all important data and dumps it
+    into a date-named json-file.
+    Returns the filename of the created file.
+    """
     created_file = None
     if load:
         data = load_json_file("json", "20140725_0940.json")
@@ -202,9 +213,15 @@ if __name__ == "__main__":
             filename='json/%s.json' % datetime.now().strftime("%Y%m%d_%H%M")
         )
 
-
     for entry in entry_manager.get_entries():
         scrape_detail(entry)
 
     if created_file:
-        serialize_and_save(entry_manager.get_entries(), created_file)
+        return serialize_and_save(entry_manager.get_entries(), created_file)
+    return None
+
+
+if __name__ == "__main__":
+    # TODO: Accept sys args
+    load = False
+    run()
