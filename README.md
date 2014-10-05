@@ -24,6 +24,9 @@ Create a virtualenvironment and install the dependencies using ``pip3``::
     pip3 install requirements/default.pip
 
 
+If installation fails on ``lncurses`` try installing the development library 
+for ``ncurses``.
+``sudo apt-get install libncurses5-dev`
 
 ## Running
 
